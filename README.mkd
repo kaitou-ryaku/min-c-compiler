@@ -1,0 +1,120 @@
+# Minimal C Subset Compiler
+
+C subset compiler supporting x86 IA-32 instruction.
+
+### Build
+
+Building with running unit tests,
+
+```sh
+$ make
+```
+
+An executable file `minc.out` will be created.
+
+In some environment, unit tests will not work.
+For such case,
+
+```sh
+$ make notest
+```
+
+### Usage
+
+To compile `aaaa.c`,
+
+```sh
+$ ls
+minc.out   aaaa.c
+
+$ ./minc.out aaaa.c aaaa.asm
+
+$ ls
+aaaa.asm   aaaa.c   ast.dot   lex.txt
+minc.out   pt.dot   symb.txt
+```
+
+|File|content|
+|:--|:--|
+|aaaa.c|source file|
+|aaaa.asm|mnemonic file written in intel syntax|
+|ast.dot|abstract syntax tree written in dot language|
+|lex.txt|result of the lexical analysis|
+|minc.out|compiler|
+|pt.dot|parse tree written in dot language|
+|symb.txt|symbol table|
+
+To assemble `aaaa.asm`,
+
+```sh
+$ nasm aaaa.asm -o aaaa.o
+```
+
+To see the figures of the parse-tree and abstract-symtax-tree,
+
+```sh
+$ dot -Gdpi=300 -T png pt.dot -o pt.png
+$ dot -Gdpi=300 -T png ast.dot -o ast.png
+```
+
+Some tree drawing engine such as Graphviz is necessary to be installed.
+
+### BNF
+
+For lexical analysis,
+
+|Token Property | Definition |
+|:--|:--|
+| **TERM\_OPERATOR**    | "+"\|"-"                                                  |
+| **FACTOR\_OPERATOR**  | "\*"\|"/"\|"%"                                            |
+| **COMPARE\_OPERATOR** | "=="\|"!="\|">"\|">="\|"<"\|"<="                          |
+| **EQUAL**             | "="                                                       |
+| **COMMA**             | ","                                                       |
+| **SEMICOLON**         | ";"                                                       |
+| **LPAREN**            | "("                                                       |
+| **RPAREN**            | ")"                                                       |
+| **LBRACKET**          | "{"                                                       |
+| **RBRACKET**          | "}"                                                       |
+| **IF\_KEYWORD**       | "if"                                                      |
+| **ELSE\_KEYWORD**     | "else"                                                    |
+| **WHILE\_KEYWORD**    | "while"                                                   |
+| **RETURN\_KEYWORD**   | "return"                                                  |
+| **TYPE\_KEYWORD**     | "int"                                                     |
+| **IDENTIFY**          | **CHAR\_ALPHABET**(**CHAR\_NUMBER**\|**CHAR\_ALPHABET**)\*|
+| **NUMBER**            | **CHAR\_NUMBER**(**CHAR\_NUMBER**)\*                      |
+| **CHAR\_ALPHABET**    | "a"\|"b"\|...\|"z"\|"A"\|...\|"Z"\|"\_"                   |
+| **CHAR\_NUMBER**      | "0"\|"1"\|...\|"9"                                        |
+
+* TYPE\_KEYWORD is not match to "if", "else", "while", "return", and "int".
+* CHAR\_ALPHABET and CHAR\_NUMBER is not appear in the result.
+
+For syntax analysis,
+
+| Node Property | Definition |
+|:--|:--|
+| PROGRAM     | (V\_DEC **SEMICOLON** \| F\_DEC \| PROTOTYPE **SEMICOLON**)\*                                                                                    |
+| F\_DEC      | TYPE VARIABLE **LPAREN** (ep \| V\_DEC (**COMMA** V\_DEC)\*) **RPAREN** FUNCTION                                                                 |
+| PROTOTYPE   | TYPE VARIABLE **LPAREN** (ep \| V\_DEC (**COMMA** V\_DEC)\*) **RPAREN**                                                                          |
+| V\_DEC      | TYPE VARIABLE                                                                                                                                    |
+| FUNCTION    | **LBRACKET** (V\_DEC **SEMICOLON**)\* SENTENCE\* **RBRACKET**                                                                                    |
+| SENTENCE    |  (**SEMICOLON** \| **LBRACKET** SENTENCE\* **RBRACKET** \| IF\_FLOW \| WHILE\_FLOW \| RETURN \| CALL **SEMICOLON** \| ASSIGN)                    |
+| IF\_FLOW    | **IF\_KEYWORD** **LPAREN** EXPRESSION **RPAREN** **LBRACKET** SENTENCE\* **RBRACKET** (ep \|**ELSE\_KEYWORD** **LBRACKET** SENTENCE **RBRACKET**)|
+| WHILE\_FLOW | **WHILE\_KEYWORD** **LPAREN** EXPRESSION **RPAREN** **LBRACKET** SENTENCE\* **RBRACKET**                                                         |
+| RETURN      | **RETURN\_KEYWORD** EXPRESSION **SEMICOLON**                                                                                                     |
+| ASSIGN      | VARIABLE **EQUAL** EXPRESSION **SEMICOLON**                                                                                                      |
+| CALL        | VARIABLE **LPAREN** (ep \| ARGUMENTS) **RPAREN**                                                                                                 |
+| ARGUMENTS   | (ep \| EXPRESSION (**COMMA** EXPRESSION)\*)                                                                                                      |
+| EXPRESSION  | FORMULA (**COMPARE\_OPERATOR** FORMULA)\*                                                                                                        |
+| FORMULA     | (ep \| **TERM\_OPERATOR** ) TERM ( **TERM\_OPERATOR** TERM)\*                                                                                    |
+| TERM        | FACTOR (ep\|**FACTOR\_OPERATOR** FACTOR)\*                                                                                                       |
+| FACTOR      | (IMMEDIATE \| **LPAREN** EXPRESSION **RPAREN** \| CALL \| VARIABLE)                                                                              |
+| B\_OPERATOR | (**TERM\_OPERATOR** \| **FACTOR\_OPERATOR** \| **COMPARE\_OPERATOR**)                                                                            |
+| IMMEDIATE   | **NUMBER**                                                                                                                                       |
+| VARIABLE    | **IDENTIFY**                                                                                                                                     |
+| TYPE        | **TYPE\_KEYWORD**                                                                                                                                |
+
+Empty word is represented by ep.
+
+### License
+
+MIT
