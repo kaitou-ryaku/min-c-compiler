@@ -101,10 +101,7 @@ static void eliminate_insignificant(SOURCE s) {/*{{{*/
   fresh_tree(s);
   while (node != NULL) {
     if (node -> kind == SKIP_NODE) delete_node_recursive(node);
-    if ( (node -> kind == SENTENCE)
-      && (s.token[node -> init].kind == SEMICOLON)
-      && (node -> init == node -> last)) delete_node_recursive(node);
-    node = go_next_node(node); // 削除後に down に移動しても、再度戻ってくるので問題ない
+    node = go_next_node(node);
   }
 }/*}}}*/
 static void eliminate_redundant_sentence(SOURCE s) {/*{{{*/
