@@ -132,7 +132,7 @@ static void register_global_v(NODE *node, int *address, TABLE *t, SOURCE s) {/*{
   t[hash].root        = s.program;   // 宣言の存在する関数 (グローバルなら &(node[0]))
   t[hash].root_name   = "GLOBAL";    // 宣言の存在する場所の名前
   t[hash].block       = 0;           // 宣言の存在するブロックの深さ (グローバルなら0, 引数なら1, 関数内の宣言なら2, if文内の宣言なら3)
-  t[hash].address     = 0;           // プログラム全体のサイズが決まってから割当
+  t[hash].address     = *address;    // 全プログラムの末尾からの差分
 
   *address += INT_SIZE;
 }/*}}}*/
