@@ -169,7 +169,7 @@ static void asm_if(FILE *fp, NODE *sentence, SOURCE s, TABLE *tb) {/*{{{*/
   NODE *block = cond -> right;
   const int label_num = sentence -> init;
 
-  asm_expr(fp, cond, s, tb, "while_begin");
+  asm_expr(fp, cond, s, tb, "if_begin");
   fprintf(fp, "pop eax\n");
   fprintf(fp, "cmp eax, 0\n");
 
